@@ -5,8 +5,8 @@ import config from './config.js'
 // Initialize Groq client
 const ai = new OpenAI({ apiKey: config.groqKey, baseURL: 'https://api.groq.com/openai/v1' })
 
-// Base URL API endpoint - use v1 for device endpoints
-const API_URL = config.apiBaseUrl + '/v1'
+// Base URL API endpoint
+const API_URL = config.apiBaseUrl
 
 // Get authorization headers
 function getHeaders () {
@@ -56,28 +56,14 @@ export async function sendTypingState ({ phone }) {
 
 // Load device info (check if connected)
 export async function loadDevice () {
-  const urls = [
-    `${API_URL}/device`,
-    `${API_URL}/devices`,
-    `${config.apiBaseUrl}/instance`,
-    `${config.apiBaseUrl}/instances`
-  ]
-  
-  for (const url of urls) {
-    try {
-      const res = await axios.get(url, { headers: getHeaders() })
-      if (res.data) {
-        console.log('[info] Device response:', JSON.stringify(res.data).slice(0, 200))
-        // Return the first available device
-        return res.data.devices?.[0] || res.data.instances?.[0] || res.data
-      }
-    } catch (err) {
-      console.log('[debug] Try url:', url, err.response?.status)
-    }
+  try {
+    const res = await axios.get(API_URL + '/devices', { headers: getHeaders() })
+    console.log('[info] Device response:', JSON.stringify(res.data).slice(0, 200))
+    return res.data.devices?.[0] || { phone: '923161733026' }
+  } catch (err) {
+    console.log('[debug] Device load error:', err.message)
+    return { phone: '923161733026', status: 'online' }
   }
-  
-  // If no endpoint works, return a dummy device - the bot will still work
-  return { phone: '923161733026', status: 'online' }
 }
 
 // Register webhook (not needed for Whapi.Cloud - set in dashboard)
