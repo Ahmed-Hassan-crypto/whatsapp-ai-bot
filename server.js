@@ -26,11 +26,13 @@ app.get('/', (req, res) => {
 // Whapi.Cloud webhook format
 app.post('/webhook', (req, res) => {
   const { body } = req
+  
+  console.log('[debug] Webhook received:', JSON.stringify(body).slice(0, 500))
 
   res.send({ ok: true })
 
   const event = body?.event
-  const msg = body?.payload?.messages?.[0]
+  const msg = body?.payload?.messages?.[0] || body?.message
 
   if (event === 'message' && msg) {
     const fromNumber = msg.from
@@ -49,6 +51,24 @@ app.post('/webhook', (req, res) => {
 
     bot.processMessage({ data }).catch(err => {
       console.error('[error] failed to process inbound message:', fromNumber, err.message)
+    })
+  } else if (body?.type === 'text' || body?.body) {
+    // Alternative format
+    const fromNumber = body.from || body.sender
+    const messageBody = body.body || body.text?.body || ''
+    const type = body.type || 'text'
+
+    const data = {
+      id: body.id,
+      type,
+      fromNumber,
+      body: messageBody,
+      date: body.timestamp,
+      chat: { id: fromNumber, fromNumber, contact: { phone: fromNumber } }
+    }
+
+    bot.processMessage({ data }).catch(err => {
+      console.error('[error] failed to process:', fromNumber, err.message)
     })
   }
 })
