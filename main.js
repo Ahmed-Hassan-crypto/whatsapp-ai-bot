@@ -66,9 +66,7 @@ async function main () {
   }
 
   const device = await actions.loadDevice()
-  if (!device) {
-    return exit('Failed to load WhatsApp device. Check your Whapi.Cloud account.')
-  }
+  console.log('[info] Device loaded:', device)
 
   if (!fs.existsSync(config.tempPath)) {
     fs.mkdirSync(config.tempPath)
