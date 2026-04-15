@@ -124,7 +124,7 @@ export default {
   apiKey,
 
   // Required. Groq API key. See the `groqKey` declaration above.
-  groqKey: groqKey,
+  groqKey,
 
   // Required. Set the Groq model to use. See the `openaiModel` declaration above.
   // Free models: llama-3.3-70b-versatile, mixtral-8x7b-32768
